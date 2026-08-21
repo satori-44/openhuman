@@ -14,6 +14,16 @@ mod mcp_setup;
 mod url_guard;
 mod web_fetch;
 
+/// DNS-free URL and SSRF predicates for embedders that need to mirror the
+/// network tools' preflight decisions without duplicating their rules.
+///
+/// The DNS-resolving path remains private; callers that make outbound requests
+/// should use the network tool's full DNS-rebinding check instead.
+pub use url_guard::{
+    extract_host, host_matches_allowlist, is_private_or_local_host, normalize_allowed_domains,
+    normalize_domain, validate_url,
+};
+
 pub use curl::CurlTool;
 pub use gitbooks::{GitbooksGetPageTool, GitbooksSearchTool};
 pub use gmail_unsubscribe::GmailUnsubscribeTool;

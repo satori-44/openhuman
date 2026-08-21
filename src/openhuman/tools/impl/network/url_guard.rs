@@ -31,7 +31,7 @@ use std::net::{IpAddr, ToSocketAddrs};
 
 /// Validate a URL against the allowlist + SSRF rules. Returns the
 /// original URL on success.
-pub(super) fn validate_url(raw_url: &str, allowed_domains: &[String]) -> anyhow::Result<String> {
+pub fn validate_url(raw_url: &str, allowed_domains: &[String]) -> anyhow::Result<String> {
     let url = raw_url.trim();
 
     if url.is_empty() {
@@ -164,7 +164,11 @@ async fn resolve_host_ips(host: String, port: u16) -> anyhow::Result<Vec<IpAddr>
     })?
 }
 
-pub(super) fn normalize_allowed_domains(domains: Vec<String>) -> Vec<String> {
+/// Normalize configured domains for strict allowlist matching.
+///
+/// Invalid entries are discarded; if every entry is invalid, a sentinel keeps
+/// the allowlist fail-closed instead of silently switching to open mode.
+pub fn normalize_allowed_domains(domains: Vec<String>) -> Vec<String> {
     if domains.is_empty() {
         return Vec::new();
     }
@@ -188,7 +192,8 @@ pub(super) fn normalize_allowed_domains(domains: Vec<String>) -> Vec<String> {
     normalized
 }
 
-pub(super) fn normalize_domain(raw: &str) -> Option<String> {
+/// Normalize one configured domain, returning `None` for malformed input.
+pub fn normalize_domain(raw: &str) -> Option<String> {
     let mut d = raw.trim().to_lowercase();
     if d.is_empty() {
         return None;
@@ -217,7 +222,8 @@ pub(super) fn normalize_domain(raw: &str) -> Option<String> {
     Some(d)
 }
 
-pub(super) fn extract_host(url: &str) -> anyhow::Result<String> {
+/// Extract and normalize the hostname from an HTTP(S) URL.
+pub fn extract_host(url: &str) -> anyhow::Result<String> {
     let rest = url
         .strip_prefix("http://")
         .or_else(|| url.strip_prefix("https://"))
@@ -283,7 +289,8 @@ fn extract_port(url: &str) -> anyhow::Result<u16> {
     Ok(if is_http { 80 } else { 443 })
 }
 
-pub(super) fn host_matches_allowlist(host: &str, allowed_domains: &[String]) -> bool {
+/// Return whether a hostname matches an exact, subdomain, or wildcard allowlist entry.
+pub fn host_matches_allowlist(host: &str, allowed_domains: &[String]) -> bool {
     allowed_domains.iter().any(|domain| {
         // `"*"` is the explicit allow-all wildcard (the "Allow all sites"
         // toggle), mirroring the browser tool. Local/private hosts are still
@@ -297,7 +304,8 @@ pub(super) fn host_matches_allowlist(host: &str, allowed_domains: &[String]) -> 
     })
 }
 
-pub(super) fn is_private_or_local_host(host: &str) -> bool {
+/// Return whether a hostname or IP literal targets a private or local address.
+pub fn is_private_or_local_host(host: &str) -> bool {
     let bare = host
         .strip_prefix('[')
         .and_then(|h| h.strip_suffix(']'))
