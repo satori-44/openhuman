@@ -818,6 +818,14 @@ fn system_prompt_includes_tool_policy_boundary() {
         .expect("prompt");
 
     assert!(prompt.contains("## Tool Policy Boundary"));
+    assert!(
+        !prompt.starts_with("## Tool Policy Boundary"),
+        "session-specific policy data must not replace the stable prompt prefix"
+    );
+    assert!(
+        prompt.ends_with("- Restricted tools: 1 omitted by policy\n"),
+        "the policy boundary should be appended after the assembled prompt"
+    );
     assert!(prompt.contains("Allowed tools: echo"));
     assert!(prompt.contains("Restricted tools: 1 omitted by policy"));
     assert!(!prompt.contains("write_notes"));

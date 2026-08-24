@@ -337,7 +337,7 @@ impl Agent {
         // channel runtimes — shares one builder configuration.
         let mut prompt = self.context.build_system_prompt(&ctx)?;
         if let Some(boundary) = render_tool_policy_boundary(&self.tool_policy_session, 2048) {
-            prompt = format!("{boundary}\n\n{prompt}");
+            prompt = format!("{prompt}\n\n{boundary}");
         }
         Ok(prompt)
     }
