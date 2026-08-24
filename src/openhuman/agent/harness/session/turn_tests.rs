@@ -819,7 +819,9 @@ fn system_prompt_includes_tool_policy_boundary() {
 
     assert!(prompt.contains("## Tool Policy Boundary"));
     assert!(
-        !prompt.starts_with("## Tool Policy Boundary"),
+        prompt.starts_with(
+            "## Project Context\n\nThe following workspace files define your identity, behavior, and context."
+        ),
         "session-specific policy data must not replace the stable prompt prefix"
     );
     assert!(
